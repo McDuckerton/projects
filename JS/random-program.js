@@ -29,18 +29,35 @@ const createPerson = () => {
     return person;
 }
 
-// const p = createPerson();
-
-// console.log(p);
-
 const people = Array.from({length: 100}, () => createPerson());
 
 // let sortByAge = people.sort((p1,p2)=>{
 //     return p1.age - p2.age;
 // });
 
-let averageAgeOfFred = people.reduce((a, b) =>{
-    
-});
+// const fredObjects = people.filter(name => name.name === "Fred");
 
-console.log(sortByAge);
+
+const averageAge = (peopleArray) => {
+    let avg = 0
+    let sum = 0
+    let fredCount = 0
+    for (let i = 0; i < peopleArray.length; i++){
+        if(peopleArray[i].name === 'Fred'){
+            sum += peopleArray[i].age;
+            fredCount++;
+        }
+    }
+    if(fredCount === 0){ // in case division by zero
+        return 0;
+    }
+    avg = sum / fredCount;
+    return Math.floor(avg); // to return a round number
+}
+
+
+// console.log(getRandom(1, 101));
+// console.log(pickRandom(nameArray));
+// console.log(createPerson());
+// console.log(people);
+console.log("The average age of all Freds is " + averageAge(people) + ".");
