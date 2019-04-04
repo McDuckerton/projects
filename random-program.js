@@ -35,17 +35,12 @@ const createPerson = () => {
 
 const people = Array.from({length: 100}, () => createPerson());
 
-for(var i=0; i < people.length; i += 1) {
-        
-} 
+// let sortByAge = people.sort((p1,p2)=>{
+//     return p1.age - p2.age;
+// });
 
-// console.log(people);
+let averageAgeOfFred = people.reduce((a, b) =>{
+    
+});
 
-
-
-
-
-
-
-
-
+console.log(sortByAge);
