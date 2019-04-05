@@ -31,20 +31,14 @@ const createPerson = () => {
 
 const people = Array.from({length: 100}, () => createPerson());
 
-// let sortByAge = people.sort((p1,p2)=>{
-//     return p1.age - p2.age;
-// });
-
 // const fredObjects = people.filter(name => name.name === "Fred");
 
-
-const averageAge = (peopleArray) => {
-    let avg = 0
+const averageAge = (array) => {
     let sum = 0
     let fredCount = 0
-    for (let i = 0; i < peopleArray.length; i++){
-        if(peopleArray[i].name === 'Fred'){
-            sum += peopleArray[i].age;
+    for (let i = 0; i < array.length; i++){
+        if(array[i].name === 'Fred'){
+            sum += array[i].age;
             fredCount++;
         }
     }
@@ -55,9 +49,34 @@ const averageAge = (peopleArray) => {
     return Math.floor(avg); // to return a round number
 }
 
+const underTwenty = people.filter(age => age.age < 20);
+const twentyToThirty = people.filter(age => age.age >= 20 && age.age < 30);
+const thirtyToForty = people.filter(age => age.age >= 30 && age.age < 40);
+const fortyToFifty = people.filter(age => age.age >= 40 && age.age < 50);
+const fiftyToSixty = people.filter(age => age.age >= 50 && age.age < 60);
+const sixtyToSeventy = people.filter(age => age.age >= 60 && age.age < 70);
+const seventyToEighty = people.filter(age => age.age >= 70 && age.age < 80);
+const eightyToNinety = people.filter(age => age.age >= 80 && age.age < 90);
+const ninetyToHundred = people.filter(age => age.age >= 90 && age.age <= 100);
 
-// console.log(getRandom(1, 101));
-// console.log(pickRandom(nameArray));
-// console.log(createPerson());
-// console.log(people);
+const demoNumber = (array) => {
+    let ageGroup = 0;
+    for(let i = 0; i < array.length; i++){
+        ageGroup = array.length;
+    } 
+    return ageGroup;
+}
+
 console.log("The average age of all Freds is " + averageAge(people) + ".");
+console.log("People under 20: " + demoNumber(underTwenty));
+console.log("People between 20 and 30: " + demoNumber(twentyToThirty));
+console.log("People between 30 and 40: " + demoNumber(thirtyToForty));
+console.log("People between 40 and 50: " + demoNumber(fortyToFifty));
+console.log("People between 50 and 60: " + demoNumber(fiftyToSixty));
+console.log("People between 60 and 70: " + demoNumber(sixtyToSeventy));
+console.log("People between 70 and 80: " + demoNumber(seventyToEighty));
+console.log("People between 80 and 90: " + demoNumber(eightyToNinety));
+console.log("People between 90 and 100: " + demoNumber(ninetyToHundred));
+
+
+
