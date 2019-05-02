@@ -1,0 +1,16 @@
+VPCID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --output json | jq ".Vpc.VpcId" | tr -d '"')
+echo $VPCID
+
+aws ec2 create-tags --resources $VPCID --tags Key=Name,Value=MyVPC
+
+
+
+SGID=$(aws ec2 create-security-group --group-name RemoteSg --description "this is my remotesg" |jq ".GroupId" | tr -d '"')
+echo $SGID
+
+curl https://ipinfo.io/ip > ip.text
+awk '{ print $0 "/32" }' < ip.text > ipnew.txt
+export PUBLICIP=$(cat ipnew.txt)
+
+
+aws ec2 authorize-security-group-ingress --group-id $SGID --protocol tcp --port 22 --cidr $PUBLICIP
