@@ -1,0 +1,7 @@
+# delete security group
+aws ec2 delete-security-group --group-name RemoteSg
+ 
+# delete vpc
+VPCID=$(aws ec2 describe-vpcs | jq ".Vpcs[1].VpcId" | tr -d '"')
+echo $VPCID
+aws ec2 delete-vpc --vpc-id $VPCID

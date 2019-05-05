@@ -1,16 +1,19 @@
+# create new vpc
 VPCID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --output json | jq ".Vpc.VpcId" | tr -d '"')
 echo $VPCID
 
+# name vpc
 aws ec2 create-tags --resources $VPCID --tags Key=Name,Value=MyVPC
 
-
-
+# instantiate and attach security group
 SGID=$(aws ec2 create-security-group --group-name RemoteSg --description "this is my remotesg" |jq ".GroupId" | tr -d '"')
 echo $SGID
+aws ec2 create-tags --resource $SGID --tags Key=Name,Value=RemoteSG
 
-curl https://ipinfo.io/ip > ip.text
-awk '{ print $0 "/32" }' < ip.text > ipnew.txt
-export PUBLICIP=$(cat ipnew.txt)
-
-
-aws ec2 authorize-security-group-ingress --group-id $SGID --protocol tcp --port 22 --cidr $PUBLICIP
+# create subnet public subnets
+SUBNETID=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.0.0/24 --availability-zone us-east-1a --output json | jq ".Subnet.SubnetId" | tr -d '"')
+echo $SUBNETID
+aws ec2 create-tags --resources $SUBNETID --tags Key=Name,Value=Public-Subnet 
+SUBNETID2=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.2.0/24 --availability-zone us-east-1b --output json | jq ".Subnet.SubnetId" | tr -d '"')
+echo $SUBNETID2
+aws ec2 create-tags --resources $SUBNETID2 --tags Key=Name,Value=Public-Subnet

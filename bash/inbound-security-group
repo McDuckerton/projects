@@ -1,0 +1,6 @@
+# curl for public IP to add to SG
+PUBLICIP="$(curl -s https://ipinfo.io/ip)/32"
+echo $PUBLICIP
+
+# add inbound ssh rule with current public IiP
+aws ec2 authorize-security-group-ingress --group-name RemoteSg --protocol tcp --port 22 --cidr $PUBLICIP
