@@ -1,7 +1,23 @@
-# delete security group
-aws ec2 delete-security-group --group-name RemoteSg
- 
-# delete vpc
+SGID=$(aws ec2 describe-security-groups --filter "Name=group-name,Values=RemoteSg" --query "SecurityGroups[].GroupId" | tr -d '[]" '
+echo $SGID
+aws ec2 delete-security-group --group-id $SGID
+
+# describe vpc and assign variable
 VPCID=$(aws ec2 describe-vpcs | jq ".Vpcs[1].VpcId" | tr -d '"')
 echo $VPCID
+
+# delete subnets
+SUBNETID1=$(aws ec2 describe-subnets --filter "Name=vpc-id,Values=$VPCID" | jq ".Subnets[0].SubnetId" | tr -d '"')
+echo $SUBNETID1
+SUBNETID2=$(aws ec2 describe-subnets --filter "Name=vpc-id,Values=$VPCID" | jq ".Subnets[1].SubnetId" | tr -d '"')
+echo $SUBNETID2
+aws ec2 delete-subnet --subnet-id $SUBNETID1
+aws ec2 delete-subnet --subnet-id $SUBNETID2
+
+# delete security group
+SGID=$(aws ec2 describe-security-groups --filter "Name=group-id,Values=RemoteSg" --query "SecurityGroups[].GroupId" | tr -d '[]" ')
+echo $SGID
+aws ec2 delete-security-group --group-id $SGID
+
+# delete VPC
 aws ec2 delete-vpc --vpc-id $VPCID
