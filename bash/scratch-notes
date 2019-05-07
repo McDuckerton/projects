@@ -1,1 +1,6 @@
-aws ec2 describe-security-groups --filter "Name=vpc-id,Values=$VPCID" --query "SecurityGroups[].GroupId" | tr -d '[] "'
+aws ec2 describe-security-groups --filter "Name=vpc-id,Values=$VPCID" --query "SecurityGroups[].GroupId" | tr -d '[] "
+
+
+
+aws ec2 revoke-security-group-ingress --group-id $SGID --ip-permissions '[{"IpProtocol": "all", "FromPort": "any", "ToPort": "any", "IpRanges": [{"$SGID"}]}]'
+'
