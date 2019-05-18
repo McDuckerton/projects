@@ -11,11 +11,53 @@ echo $SGID
 aws ec2 create-tags --resource $SGID --tags Key=Name,Value=RemoteSG
 
 # create subnet public subnets
-SUBNETID=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.0.0/24 --availability-zone us-east-1a --output json | jq ".Subnet.SubnetId" | tr -d '"')
-echo $SUBNETID
-aws ec2 create-tags --resources $SUBNETID --tags Key=Name,Value=Public-Subnet 
-SUBNETID2=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.2.0/24 --availability-zone us-east-1b --output json | jq ".Subnet.SubnetId" | tr -d '"')
+SUBNETID1=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.0.0/24 --availability-zone us-east-1a --output json | jq ".Subnet.SubnetId" | tr -d '"')
+echo $SUBNETID1
+aws ec2 create-tags --resources $SUBNETID1 --tags Key=Name,Value=Public-Subnet 
+SUBNETID2=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.1.0/24 --availability-zone us-east-1a --output json | jq ".Subnet.SubnetId" | tr -d '"')
 echo $SUBNETID2
-aws ec2 create-tags --resources $SUBNETID2 --tags Key=Name,Value=Public-Subnet
+aws ec2 create-tags --resources $SUBNETID2 --tags Key=Name,Value=Private-Subnet
+SUBNETID3=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.2.0/24 --availability-zone us-east-1b --output json | jq ".Subnet.SubnetId" | tr -d '"')
+echo $SUBNETID3
+aws ec2 create-tags --resources $SUBNETID3 --tags Key=Name,Value=Public-Subnet
+SUBNETID4=$(aws ec2 create-subnet --vpc-id $VPCID --cidr-block 10.0.3.0/24 --availability-zone us-east-1b --output json | jq ".Subnet.SubnetId" | tr -d '"')
+echo $SUBNETID4
+aws ec2 create-tags --resources $SUBNETID4 --tags Key=Name,Value=Private-Subnet
 
+# create public route table
+PUBLICRT=$(aws ec2 create-route-table --vpc-id $VPCID --output json | jq ".RouteTable.RouteTableId" | tr -d '"')
+echo $PUBLICRT
+aws ec2 create-tags --resources $PUBLICRT --tags Key=Name,Value=Public-RT
 
+# associate public subnets with public route table
+aws ec2 associate-route-table --route-table-id $PUBLICRT --subnet-id $SUBNETID1
+aws ec2 associate-route-table --route-table-id $PUBLICRT --subnet-id $SUBNETID3
+
+# create private route table
+PRIVATERT=$(aws ec2 create-route-table --vpc-id $VPCID --output json | jq ".RouteTable.RouteTableId" | tr -d '"')
+echo $PRIVATERT
+aws ec2 create-tags --resources $PRIVATERT --tags Key=Name,Value=Private-RT
+
+# associate private subnets with private route table
+aws ec2 associate-route-table --route-table-id $PRIVATERT --subnet-id $SUBNETID2
+aws ec2 associate-route-table --route-table-id $PRIVATERT --subnet-id $SUBNETID4
+
+# create and attach igw
+IGWID=$(aws ec2 create-internet-gateway --output json | jq ".InternetGateway.InternetGatewayId" | tr -d '"')
+echo $IGWID
+aws ec2 attach-internet-gateway --internet-gateway-id $IGWID --vpc-id $VPCID
+
+# create and allocate an elastic IP
+EIPID=$(aws ec2 allocate-address --output json | jq ".AllocationId" | tr -d '"')
+echo $EIPID
+
+# create nat gateway
+NATGWID=$(aws ec2 create-nat-gateway --subnet-id $SUBNETID1 --allocation-id $EIPID --output json | jq ".NatGateway.NatGatewayId" | tr -d '"')
+echo $NATGWID
+aws ec2 wait nat-gateway-available
+
+# create route to nat gateway
+aws ec2 create-route --route-table-id $PRIVATERT --destination-cidr-block 0.0.0.0/0 --nat-gateway-id $NATGWID
+
+# create route to igw
+aws ec2 create-route --route-table-id $PUBLICRT --destination-cidr-block 0.0.0.0/0 --gateway-id $IGWID
