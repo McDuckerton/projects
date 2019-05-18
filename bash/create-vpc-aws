@@ -1,4 +1,4 @@
-# create new vpc
+# create new vpc shell
 VPCID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --output json | jq ".Vpc.VpcId" | tr -d '"')
 echo $VPCID
 
