@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Instantiate a basic architecture
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          Default: "VPC Configuration"
+          Parameters:
+            - VpcCidr
+            - PublicSubnetA
+            - PrivateSubnetA
+            - PublicSubnetB
+            - PrivateSubnetB
+            - AvailabilityZone1
+            - AvailabilityZone2
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+  PublicSubnetA:
+    Type: String
+    Default: 10.0.0.0/24
+  PrivateSubnetA:
+    Type: String
+    Default: 10.0.1.0/24
+  PublicSubnetB:
+    Type: String
+    Default: 10.0.2.0/24
+  PrivateSubnetB:
+    Type: String
+    Default: 10.0.3.0/24
+  AvailabilityZone1:
+    Type: String
+    Default: us-east-1a
+  AvailabilityZone2:
+    Type: String
+    Default: us-east-1b
+Resources:
+  MyVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: 'Development VPC'
+  VpcIgw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: 'dev-gateway'
+  
