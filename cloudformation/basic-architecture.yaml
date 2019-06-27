@@ -60,6 +60,13 @@ Resources:
       Tags:
         - Key: Name
           Value: 'Public Route Table A'
+  DevIgwRouteA:
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId: !Ref PublicRouteTableA
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref VpcIgw
+    DependsOn: VpcIgw
   PrivateRouteTableA:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -67,7 +74,7 @@ Resources:
       Tags:
         - Key: Name
           Value: 'Private Route Table A'
-    PublicRouteTableB:
+  PublicRouteTableB:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref MyVpc
@@ -81,7 +88,7 @@ Resources:
       Tags:
         - Key: Name
           Value: 'Private Route Table B'
-  AttachGateway:
+  AttachGatewayA:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref MyVpc
@@ -136,7 +143,7 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref MyPrivateSubnetA
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTableA
   PrivateSubnetBRouteTableAssoc:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -160,10 +167,10 @@ Resources:
     Properties:
       AllocationId: !GetAtt DevEIPB.AllocationId
       SubnetId: !Ref MyPublicSubnetB
-  DevIgwRoute:
+  DevIgwRouteB:
     Type: "AWS::EC2::Route"
     Properties:
-      RouteTableId: !Ref PublicRouteTable
+      RouteTableId: !Ref PublicRouteTableB
       DestinationCidrBlock: "0.0.0.0/0"
       GatewayId: !Ref VpcIgw
   DevNatGatewayRouteA:
