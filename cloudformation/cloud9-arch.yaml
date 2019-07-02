@@ -8,13 +8,13 @@ Metadata:
           Default: "VPC Configuration for Cloud9"
           Parameters:
             - VpcCidr
-            - PublicSubnet
+            - Cloud9Subnet
             - AvailabilityZone
 Parameters:
   VpcCidr:
     Type: String
     Default: 10.10.0.0/22
-  PublicSubnet:
+  Cloud9Subnet:
     Type: String
     Default: 10.10.0.0/24
   AvailabilityZone:
@@ -30,46 +30,39 @@ Resources:
       InstanceTenancy: default
       Tags:
         - Key: Name
-          Value: 'Cloud9 VPC'
-  VpcIgw:
+          Value: 'cloud9-vpc'
+  Cloud9Igw:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
           Value: 'cloud9-gateway'
-  PublicRouteTable:
+  Cloud9RouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref Cloud9Vpc
       Tags:
         - Key: Name
-          Value: 'Public Route Table'
-  DevIgwRoute:
-    Type: "AWS::EC2::Route"
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: "0.0.0.0/0"
-      GatewayId: !Ref VpcIgw
-    DependsOn: VpcIgw
+          Value: 'cloud9-route-table'
   AttachGatewayA:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref Cloud9Vpc
-      InternetGatewayId: !Ref VpcIgw
-  MyPublicSubnet:
+      InternetGatewayId: !Ref Cloud9Igw
+  Cloud9Subnet:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref AvailabilityZone
       VpcId: !Ref Cloud9Vpc
-      CidrBlock: !Ref PublicSubnet
+      CidrBlock: !Ref Cloud9Subnet
       Tags:
         - Key: Name
-          Value: 'Public Subnet A'
-  PublicSubnetARouteTableAssoc:
+          Value: 'cloud9-subnet'
+  Cloud9SubnetRouteTableAssoc:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref MyPublicSubnet
-      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref Cloud9Subnet
+      RouteTableId: !Ref Cloud9RouteTable
   Cloud9EIPA:
     Type: AWS::EC2::EIP
     Properties:
@@ -77,6 +70,7 @@ Resources:
   Cloud9IgwRoute:
     Type: "AWS::EC2::Route"
     Properties:
-      RouteTableId: !Ref PublicRouteTable
+      RouteTableId: !Ref Cloud9RouteTable
       DestinationCidrBlock: "0.0.0.0/0"
-      GatewayId: !Ref VpcIgw
+      GatewayId: !Ref Cloud9Igw
+      DependsOn: !Ref Cloud9Igw
