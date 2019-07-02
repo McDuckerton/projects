@@ -36,7 +36,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: 'dev-gateway'
+          Value: 'cloud9-gateway'
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -73,7 +73,7 @@ Resources:
   Cloud9EIPA:
     Type: AWS::EC2::EIP
     Properties:
-      Domain: !Ref MyVpc
+      Domain: !Ref Cloud9Vpc
   Cloud9IgwRoute:
     Type: "AWS::EC2::Route"
     Properties:

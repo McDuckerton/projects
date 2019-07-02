@@ -1,5 +1,5 @@
-TEMPLATE_URL='https://dev-cf-scripts.s3.amazonaws.com/basic-architecture.yaml'
-STACK_NAME='mystack-dev'
+TEMPLATE_URL='https://dev-cf-scripts.s3.amazonaws.com/cloud9-arch.yaml'
+STACK_NAME='cloud9-stack'
 
 aws cloudformation create-stack \
  --stack-name ${STACK_NAME} --template-url ${TEMPLATE_URL} --output text
