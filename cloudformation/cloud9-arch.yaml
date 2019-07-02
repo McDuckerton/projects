@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: spin up infra for cloud9 dev env
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          Default: "VPC Configuration for Cloud9"
+          Parameters:
+            - VpcCidr
+            - PublicSubnetA
+            - AvailabilityZone1
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: 10.10.0.0/22
+  PublicSubnet:
+    Type: String
+    Default: 10.10.0.0/24
+  AvailabilityZone:
+    Type: String
+    Default: us-east-1a
+Resources:
+  Cloud9Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: 'Cloud9 VPC'
+  VpcIgw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: 'dev-gateway'
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Cloud9Vpc
+      Tags:
+        - Key: Name
+          Value: 'Public Route Table'
+  DevIgwRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref VpcIgw
+    DependsOn: VpcIgw
+  AttachGatewayA:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Cloud9Vpc
+      InternetGatewayId: !Ref VpcIgw
+  MyPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      VpcId: !Ref MyVpc
+      CidrBlock: !Ref PublicSubnet
+      Tags:
+        - Key: Name
+          Value: 'Public Subnet A'
+  PublicSubnetARouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+  Cloud9EIPA:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: !Ref MyVpc
+  Cloud9IgwRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId: !Ref PublicRouteTableB
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref VpcIgw

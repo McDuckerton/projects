@@ -3,3 +3,6 @@ STACKNAME=$(aws cloudformation describe-stacks \
  --output text)
 
 aws cloudformation delete-stack --stack-name $STACKNAME
+
+aws cloudformation wait stack-delete-complete \
+ --stack-name $STACKNAME
