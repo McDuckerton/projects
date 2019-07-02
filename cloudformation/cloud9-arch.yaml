@@ -8,8 +8,8 @@ Metadata:
           Default: "VPC Configuration for Cloud9"
           Parameters:
             - VpcCidr
-            - PublicSubnetA
-            - AvailabilityZone1
+            - PublicSubnet
+            - AvailabilityZone
 Parameters:
   VpcCidr:
     Type: String
@@ -60,7 +60,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref AvailabilityZone
-      VpcId: !Ref MyVpc
+      VpcId: !Ref Cloud9Vpc
       CidrBlock: !Ref PublicSubnet
       Tags:
         - Key: Name
