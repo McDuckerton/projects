@@ -8,13 +8,13 @@ Metadata:
           Default: "VPC Configuration for Cloud9"
           Parameters:
             - VpcCidr
-            - Cloud9DevSubnet
+            - MyDevSubnetA
             - AvailabilityZone
 Parameters:
   VpcCidr:
     Type: String
     Default: 10.10.0.0/22
-  Cloud9DevSubnet:
+  MyDevSubnetA:
     Type: String
     Default: 10.10.0.0/24
   AvailabilityZone:
@@ -44,26 +44,26 @@ Resources:
       Tags:
         - Key: Name
           Value: 'cloud9-route-table'
-  AttachGatewayA:
+  AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref Cloud9Vpc
       InternetGatewayId: !Ref Cloud9Igw
-  Cloud9DevSubnet:
+  MyDevSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref AvailabilityZone
       VpcId: !Ref Cloud9Vpc
-      CidrBlock: !Ref Cloud9DevSubnet
+      CidrBlock: !Ref MyDevSubnetA
       Tags:
         - Key: Name
           Value: 'cloud9-subnet'
-  Cloud9DevSubnetRouteTableAssoc:
+  Cloud9RouteTableAssoc:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Cloud9DevSubnet
+      SubnetId: !Ref MyDevSubnetA
       RouteTableId: !Ref Cloud9RouteTable
-  Cloud9EIPA:
+  Cloud9EIP:
     Type: AWS::EC2::EIP
     Properties:
       Domain: !Ref Cloud9Vpc
@@ -73,4 +73,3 @@ Resources:
       RouteTableId: !Ref Cloud9RouteTable
       DestinationCidrBlock: "0.0.0.0/0"
       GatewayId: !Ref Cloud9Igw
-      DependsOn: !Ref Cloud9Igw
