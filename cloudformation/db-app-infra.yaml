@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: spin up infra for db and flask app dev env
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          Default: "VPC Configuration for Flask App & DB Dev"
+          Parameters:
+            - pVpcCidr
+            - pDbSubnetCidrA
+            - pDbSubnetCidrB
+            - pAvailabilityZone1
+            - pAvailabilityZone2
+Parameters:
+  pVpcCidr:
+    Type: String
+    Default: 10.0.0.0/22
+  pDbSubnetCidrA:
+    Type: String
+    Default: 10.0.0.0/24
+  pDbSubnetCidrB:
+    Type: String
+    Default: 10.0.1.0/24
+  pAvailabilityZone1:
+    Type: String
+    Default: us-east-1a
+  pAvailabilityZone2:
+    Type: String
+    Default: us-east-1b
+Resources:
+  rDbAppVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref pVpcCidr
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: 'db-app-vpc'
+  rDbIgw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: 'db-gateway'
+  rDbRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref rDbAppVpc
+      Tags:
+        - Key: Name
+          Value: 'db-route-table'
+  rAttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref rDbAppVpc
+      InternetGatewayId: !Ref rDbIgw
+  rDbSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref pAvailabilityZone1
+      VpcId: !Ref rDbAppVpc
+      CidrBlock: !Ref pDbSubnetCidrA
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: 'db-subnet-a'
+  rDbSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref pAvailabilityZone2
+      VpcId: !Ref rDbAppVpc
+      CidrBlock: !Ref pDbSubnetCidrB
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: 'db-subnet-b'
+  rDbSubnetRouteTableAssocA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref rDbSubnetA
+      RouteTableId: !Ref rDbRouteTable
+  rDbSubnetRouteTableAssocA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref rDbSubnetB
+      RouteTableId: !Ref rDbRouteTable
+  rDbAppEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: !Ref rDbAppVpc
+  rDbIgwRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId: !Ref rDbRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref rDbIgw
+  rInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allow admin access to client
+      VpcId: !Ref rDbAppVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: 'instance-sg'
