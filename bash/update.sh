@@ -16,3 +16,7 @@ banner
 sudo apt-get update -y
 wait
 sudo apt-get dist-upgrade -y
+wait
+sudo apt-get autoremove -y
+wait
+echo "update complete"
